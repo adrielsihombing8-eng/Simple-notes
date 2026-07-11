@@ -12,12 +12,15 @@ const userSchema = new mongoose.Schema({
     password:{
         type: String,
         required: true,
-    }
+    },
+    refreshToken: { type: String, default: null },
 });
 
 userSchema.pre('save', async function(next){
     try{
         var user = this;
+        if (!this.isModified('password')) return;
+        
         const salt = await (bcrypt.genSalt(10));
         const hashpass = await bcrypt.hash(user.password, salt);
 

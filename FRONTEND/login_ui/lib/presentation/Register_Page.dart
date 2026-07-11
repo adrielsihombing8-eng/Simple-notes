@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_ui/Login_page.dart';
+import 'package:login_ui/presentation/Login_page.dart';
 import 'package:login_ui/services/api.dart';
 
 class AppFirstLook extends StatefulWidget {
@@ -67,6 +67,7 @@ class _AppFirstLookState extends State<AppFirstLook> {
       };
 
       Api.register(pdata);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
     }
   }
 
@@ -304,7 +305,7 @@ class _AppFirstLookState extends State<AppFirstLook> {
                               ],
                             ),
                             child: CircleAvatar(
-                              child: Icon(Icons.shopping_bag),
+                              child: Icon(Icons.book_outlined),
                               backgroundColor: Colors.blue,
                               foregroundColor: Colors.white,
                             ),

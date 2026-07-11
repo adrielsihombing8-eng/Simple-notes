@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login_ui/Register_Page.dart';
-import 'package:login_ui/dashboard.dart';
+import 'package:login_ui/presentation/Register_Page.dart';
+import 'package:login_ui/modules/dashboard.dart';
 import 'package:login_ui/services/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,13 +72,15 @@ class _LoginPageState extends State<LoginPage> {
       };
 
       var earn = await Api.Login(pdata);
+      print(earn['status']);
+      print(earn);
       if(earn['status'] == true){
         var MyToken = earn['token'];
         pref.setString('token', MyToken);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(token: MyToken)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard()));
       }
       else{
-        print(earn['messages'].toString());
+        print(" error 81 : " + earn['messages'].toString());
       }
     }
   }
@@ -269,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ],
                               ),
                               child: CircleAvatar(
-                                child: Icon(Icons.shopping_bag),
+                                child: Icon(Icons.book_outlined),
                                 backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
                               ),

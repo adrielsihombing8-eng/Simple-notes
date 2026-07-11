@@ -23,6 +23,15 @@ class UserService {
     static async generateToken(tokenData, secretKey, jwt_expire){
         return jwt.sign(tokenData,secretKey,{expiresIn:jwt_expire});
     }
+
+    static async CariById(id){
+        try{
+            return userModel.findById(id);
+        }
+        catch(err){
+            throw err;
+        }
+    }
 }
 
 module.exports = UserService;
