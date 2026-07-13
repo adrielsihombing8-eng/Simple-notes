@@ -75,6 +75,7 @@ class _AppFirstLookState extends State<AppFirstLook> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
+      backgroundColor: const Color.fromARGB(255, 38, 35, 35),
       body: SafeArea(
         child: Container(
           width: double.infinity,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:login_ui/models/kategori_models.dart';
 import 'package:login_ui/models/note_models.dart';
 import 'package:login_ui/services/auth_store.dart';
 
@@ -240,6 +241,114 @@ class Api {
     } catch (err) {
       print(err.toString());
       return note = [];
+    }
+  }
+
+  //get by name
+  static Future<List<NoteModels>> getNoteByName(
+    String name,
+    String token,
+  ) async {
+    var url = Uri.parse(
+      "${BaseUrl}/get-noteByName",
+    ).replace(queryParameters: {'keyword': name});
+    List<NoteModels> note = [];
+
+    try {
+      var res = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      print(res.statusCode);
+      if (res.statusCode == 401) {
+        final newToken = await refreshToken();
+        if (newToken == null) {
+          print("newToken == null");
+          throw Exception('SESSION_EXPIRED');
+        }
+        await AuthStore.saveToken(newToken);
+        res = await http.get(
+          url,
+          headers: {'Authorization': 'Bearer $newToken'},
+        );
+      }
+
+      if (res.statusCode == 200) {
+        print("data berhasil didapat");
+        var data = jsonDecode(res.body);
+        data['data'].forEach(
+          (value) => note.add(
+            NoteModels(
+              title: value['title'],
+              pref: value['pref'],
+              desc: value['description'],
+              time: value['time'],
+              date: value['date'],
+            ),
+          ),
+        );
+      } else {
+        print("data gagal di dapat");
+      }
+
+      return note;
+    } catch (err) {
+      print(err.toString());
+      return note;
+    }
+  }
+
+  //get by name in kategory
+  static Future<List<NoteModels>> getNoteInKategory(
+    String kategori,
+    String name,
+    String token,
+  ) async {
+    var url = Uri.parse(
+      "${BaseUrl}/get-noteByNameAndKategory",
+    ).replace(queryParameters: {'title': name, 'kategori': kategori});
+    List<NoteModels> note = [];
+
+    try {
+      var res = await http.get(
+        url,
+        headers: {'Authorization': 'Baerer $token'},
+      );
+
+      if (res.statusCode == 401) {
+        final newToken = await AuthStore.getRefreshToken();
+        if (newToken == null) {
+          throw Exception('SESSION_EXPIRED');
+        }
+        await AuthStore.saveToken(newToken);
+        var res = await http.get(
+          url,
+          headers: {'Authorization': 'Baerer $token'},
+        );
+      }
+
+      if (res.statusCode == 200) {
+        print("data berhasil masuk");
+        var datas = jsonDecode(res.body);
+        datas['data'].forEach(
+          (value) => note.add(
+            NoteModels(
+              title: value['title'],
+              pref: value['pref'],
+              desc: value['desc'],
+              time: value['time'],
+              date: value['date'],
+            ),
+          ),
+        );
+      } else {
+        print("data gagal di terima");
+      }
+
+      return note;
+    } catch (err) {
+      print(err.toString());
+      return note;
     }
   }
 }

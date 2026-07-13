@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:login_ui/models/note_models.dart';
 import 'package:login_ui/modules/Home/NoteScreen.dart';
@@ -53,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() {
         token = t;
-        noteApi = Api.getNote(t!).catchError((err) {
+        noteApi = Api.getNote(t).catchError((err) {
           if (err.toString().contains('SESSION_EXPIRED')) {
             Navigator.pushReplacement(
               context,
@@ -65,6 +64,46 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  void dataNoteFind() async{
+    String? filter = searchCtrl.text.isEmpty ? null : searchCtrl.text.toString();
+    final t = await AuthStore.getToken();
+
+    if(t == null){
+      if(mounted){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      }
+      return;
+    }
+
+    if(mounted){
+      if(filter != null){
+        print(filter);
+      setState(() {
+        noteApi = Api.getNoteByName(filter, t).catchError((err){
+          if(err.toString().contains('SESSION_EXPIRED')){
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          }
+        });
+      });
+    }
+    else {
+      setState(() {
+        noteApi = Api.getNote(t).catchError((err){
+          if(err.toString().contains('SESSION_EXPIRED')){
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          }
+        });
+      });
+    }
+  }
+}
 
   List<DateTime> getDateTime() {
     return List.generate(7, (index) => dateGet.add(Duration(days: index)));
@@ -122,6 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey,
       appBar: AppBar(
         leading: Icon(Icons.note_add_rounded, color: Colors.white),
@@ -302,6 +342,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.only(bottom:  5.0),
                       child: TextField(
                         controller: searchCtrl,
+                        onSubmitted: (value){
+                          dataNoteFind();
+                        },
                         decoration: const InputDecoration(
                           hintText: 'Cari sesuatu...',
                           border: InputBorder.none,
@@ -310,6 +353,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+
+                  CircleAvatar(
+                    backgroundColor: Colors.lightBlue,
+                    foregroundColor: Colors.white,
+                    child: IconButton(onPressed: (){
+                      dataNoteFind();
+                    },
+                    icon: Icon(Icons.send)),
+                  )
                 ],
               ),
             ),

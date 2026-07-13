@@ -79,7 +79,6 @@ class _NoteCollectionState extends State<NoteCollection> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NoteListcategory(
-                        token: token!,
                         kategori: item.kategori.toString(),
                       ),
                     ),
