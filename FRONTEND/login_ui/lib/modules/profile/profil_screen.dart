@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:login_ui/modules/profile/circleVideo.dart';
+import 'package:login_ui/modules/profile/widget/circleVideo.dart';
 
 class ProfilScreen extends StatefulWidget {
   const ProfilScreen({super.key});

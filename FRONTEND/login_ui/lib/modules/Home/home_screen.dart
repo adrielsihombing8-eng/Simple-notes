@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:login_ui/models/note_models.dart';
 import 'package:login_ui/modules/Home/NoteScreen.dart';
+import 'package:login_ui/modules/Home/widget/BuildTimeLine.dart';
 import 'package:login_ui/presentation/Login_page.dart';
 import 'package:login_ui/services/api.dart';
 import 'package:login_ui/services/auth_store.dart';
@@ -21,8 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isChange = false;
   Future<List<NoteModels>>? noteApi;
   bool isSearch = false;
+  bool isDelating = false;
 
   var searchCtrl = new TextEditingController();
+  final Set<String> selectedIds = {};
 
   @override
   void initState() {
@@ -34,6 +37,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     searchCtrl.dispose();
     super.dispose();
+  }
+
+  void detectDelate(String id) {
+    setState(() {
+      isDelating = true;
+      selectedIds.add(id);
+    });
+  }
+
+  void onCheckChanged(String id, bool isChecked) {
+    setState(() {
+      if (isChecked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.remove(id);
+      }
+
+      if (selectedIds.isEmpty) {
+        isDelating = false;
+      }
+    });
   }
 
   void LoadNoteandToken() async {
@@ -65,45 +89,49 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void dataNoteFind() async{
-    String? filter = searchCtrl.text.isEmpty ? null : searchCtrl.text.toString();
+  void dataNoteFind() async {
+    String? filter = searchCtrl.text.isEmpty
+        ? null
+        : searchCtrl.text.toString();
     final t = await AuthStore.getToken();
 
-    if(t == null){
-      if(mounted){
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+    if (t == null) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
       }
       return;
     }
 
-    if(mounted){
-      if(filter != null){
+    if (mounted) {
+      if (filter != null) {
         print(filter);
-      setState(() {
-        noteApi = Api.getNoteByName(filter, t).catchError((err){
-          if(err.toString().contains('SESSION_EXPIRED')){
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            );
-          }
+        setState(() {
+          noteApi = Api.getNoteByName(filter, t).catchError((err) {
+            if (err.toString().contains('SESSION_EXPIRED')) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            }
+          });
         });
-      });
-    }
-    else {
-      setState(() {
-        noteApi = Api.getNote(t).catchError((err){
-          if(err.toString().contains('SESSION_EXPIRED')){
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            );
-          }
+      } else {
+        setState(() {
+          noteApi = Api.getNote(t).catchError((err) {
+            if (err.toString().contains('SESSION_EXPIRED')) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            }
+          });
         });
-      });
+      }
     }
   }
-}
 
   List<DateTime> getDateTime() {
     return List.generate(7, (index) => dateGet.add(Duration(days: index)));
@@ -309,7 +337,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               if (isNewDate) ...[
                                 BuildDataBadge(items.date, isToday: index == 0),
                               ],
-                              buildTimeLine(items),
+                              Buildtimeline(
+                                item: items,
+                                onCheckChanged: (bool isChecked) =>
+                                    onCheckChanged(items.objectId, isChecked),
+                                onLongPress: () => detectDelate(items.objectId),
+                                isSelectionmode: isDelating,
+                                isChecked: selectedIds.contains(items.objectId),
+                              ),
                             ],
                           );
                         },
@@ -321,63 +356,69 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          isSearch? Positioned(
-            top: 0,
-            height: 40,
-            right: MediaQuery.of(context).size.width / 2 - 140,
-            child: Container(
-              width: 280,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(width: 4,),
-                  const Icon(Icons.search),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom:  5.0),
-                      child: TextField(
-                        controller: searchCtrl,
-                        onSubmitted: (value){
-                          dataNoteFind();
-                        },
-                        decoration: const InputDecoration(
-                          hintText: 'Cari sesuatu...',
-                          border: InputBorder.none,
-                          hintStyle: TextStyle(fontSize: 15)
+          isSearch
+              ? Positioned(
+                  top: 0,
+                  height: 40,
+                  right: MediaQuery.of(context).size.width / 2 - 140,
+                  child: Container(
+                    width: 280,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 4),
+                        const Icon(Icons.search),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 5.0),
+                            child: TextField(
+                              controller: searchCtrl,
+                              onSubmitted: (value) {
+                                dataNoteFind();
+                              },
+                              decoration: const InputDecoration(
+                                hintText: 'Cari sesuatu...',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(fontSize: 15),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+
+                        CircleAvatar(
+                          backgroundColor: Colors.lightBlue,
+                          foregroundColor: Colors.white,
+                          child: IconButton(
+                            onPressed: () {
+                              dataNoteFind();
+                            },
+                            icon: Icon(Icons.send),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  CircleAvatar(
-                    backgroundColor: Colors.lightBlue,
-                    foregroundColor: Colors.white,
-                    child: IconButton(onPressed: (){
-                      dataNoteFind();
-                    },
-                    icon: Icon(Icons.send)),
-                  )
-                ],
-              ),
-            ),
-          ) : SizedBox.shrink(),
+                )
+              : SizedBox.shrink(),
         ],
       ),
 
       floatingActionButton: Padding(
-        padding: EdgeInsetsGeometry.only(bottom: isKeyboardOpen? 0 : 150),
+        padding: EdgeInsetsGeometry.only(bottom: isKeyboardOpen ? 0 : 150),
         child: FloatingActionButton(
           onPressed: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Notescreen(token: token!)),
+              MaterialPageRoute(
+                builder: (context) => Notescreen(token: token!),
+              ),
             );
-        
+
             if (result == true) {
               setState(() {
                 noteApi = Api.getNote(token!);
@@ -388,7 +429,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
           backgroundColor: Colors.blue,
           child: Icon(Icons.add, color: Colors.white),
-          shape: CircleBorder(side: BorderSide(color: Colors.white, width: 2.0)),
+          shape: CircleBorder(
+            side: BorderSide(color: Colors.white, width: 2.0),
+          ),
         ),
       ),
     );
@@ -510,73 +553,6 @@ Widget BuildDataBadge(String date, {bool isToday = false}) {
               ),
             ),
           ],
-        ),
-      ],
-    ),
-  );
-}
-
-Widget buildTimeLine(NoteModels item) {
-  return IntrinsicHeight(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Column(
-          children: [
-            Container(width: 2, height: 16, color: Colors.grey[700]),
-            Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                shape: BoxShape.circle,
-              ),
-            ),
-            Expanded(child: Container(width: 2, color: Colors.grey[700])),
-          ],
-        ),
-        const SizedBox(width: 12),
-
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    item.time,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.pref,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 13),
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     ),

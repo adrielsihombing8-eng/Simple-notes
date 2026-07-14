@@ -170,6 +170,7 @@ class Api {
           (value) => {
             note.add(
               NoteModels(
+                objectId: value ['_id'],
                 title: value['title'],
                 pref: value['pref'],
                 desc: value['description'],
@@ -179,6 +180,8 @@ class Api {
             ),
           },
         );
+        print("ini hasil");
+        print(data);
         return note;
       }
     } catch (err) {
@@ -225,6 +228,7 @@ class Api {
           (value) => {
             note.add(
               NoteModels(
+                objectId: value['_id'],
                 title: value['title'],
                 pref: value['pref'],
                 desc: value['description'],
@@ -279,6 +283,7 @@ class Api {
         data['data'].forEach(
           (value) => note.add(
             NoteModels(
+              objectId: value['_id'],
               title: value['title'],
               pref: value['pref'],
               desc: value['description'],
@@ -333,6 +338,7 @@ class Api {
         datas['data'].forEach(
           (value) => note.add(
             NoteModels(
+              objectId: value['_id'],
               title: value['title'],
               pref: value['pref'],
               desc: value['desc'],

@@ -22,6 +22,18 @@ class TodoService {
             throw new Error('error pencarian data');
         }
     }
+    
+    static async FindByName(filter){
+        try{
+            const notes = await todoModel.find(filter).sort({ createdAt : -1});
+            console.log("data di temukan");
+            return notes;
+        }
+        catch(err){
+            console.log("error pencarian");
+            throw new Error('error pencarian');
+        }
+    }
 }
 
 module.exports = TodoService;

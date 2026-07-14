@@ -6,6 +6,7 @@ exports.getNote = async (req, res, next) => {
     try {
         const userId = req.userId;
         const note = await TodoModels.find({ userId }).sort({ createdAt: -1 });
+        console.log(note);
         res.status(200).json({ status: true, data: note });
     } catch (error) {
         next(error);
@@ -102,4 +103,66 @@ exports.getNoteByData = async (req, res, next) => {
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
+};
+
+exports.getNoteBYTitle = async (req, res, next) => {
+    try{
+        console.log("memulai pencarian");
+
+        const {keyword} = req.query;
+        let filter = {userId: req.userId};
+
+        if(keyword){
+            const keywords = keyword.trim().split(/\s+/).filter(Boolean);
+            filter.$and =  keywords.map(kw => ({
+                title: {$regex: kw, $options: "i"}
+            }));
+
+            console.log(filter);
+        }
+
+        console.log("memulai penfilteran data");
+        const notes = await TodoService.FindByName(filter);
+        console.log("berhasil data didapatkan");
+        console.log(notes);
+        res.status(200).json({
+            success: true,
+            data: notes,
+        });
+    }
+    catch(err){
+        console.log(err);
+        next();
+    }
+};
+
+exports.getNoteByKatAndTitle = async (req, res, next) => {
+    const {title, kategori} = req.query;
+    const filter = {userId: req.userId};
+    const andConditon = [];
+
+    if(title){
+        title.trim().split(/\s+/).filter(Boolean).forEach(word => {
+            andConditon.push({$regex: word, $options: "i"})
+        });
+    }
+
+    if(kategori){
+        kategori.trim().split(/\s+/).filter(Boolean).forEach(word =>{
+            andConditon.push({$regex: word, $options: "i"})
+        })
+    }
+
+    if(andConditon > 0){
+        filter.$and = andConditon;
+    }
+
+    console.log("cari data");
+    const notes = await TodoService.FindByName(filter);
+    console.log("data ditemukan");
+
+    res.status(200).json({
+        success : true,
+        data : notes
+    })
 };
