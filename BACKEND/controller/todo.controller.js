@@ -166,3 +166,7 @@ exports.getNoteByKatAndTitle = async (req, res, next) => {
         data : notes
     })
 };
+
+exports.updateData = async (req, res, next) => {
+    
+};

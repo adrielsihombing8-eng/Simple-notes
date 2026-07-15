@@ -410,29 +410,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
       floatingActionButton: Padding(
         padding: EdgeInsetsGeometry.only(bottom: isKeyboardOpen ? 0 : 150),
-        child: FloatingActionButton(
-          onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Notescreen(token: token!),
+        child: isDelating
+            ? FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Colors.redAccent,
+              child: Icon(Icons.delete_outline, color: Colors.white,),
+              shape: CircleBorder(
+                  side: BorderSide(color: Colors.white, width: 2.0),
+                ),
+              )
+            : FloatingActionButton(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Notescreen(token: token!),
+                    ),
+                  );
+
+                  if (result == true) {
+                    setState(() {
+                      noteApi = Api.getNote(token!);
+                    });
+                  }
+                  ;
+                },
+
+                backgroundColor: Colors.blue,
+                child: Icon(Icons.add, color: Colors.white),
+                shape: CircleBorder(
+                  side: BorderSide(color: Colors.white, width: 2.0),
+                ),
               ),
-            );
-
-            if (result == true) {
-              setState(() {
-                noteApi = Api.getNote(token!);
-              });
-            }
-            ;
-          },
-
-          backgroundColor: Colors.blue,
-          child: Icon(Icons.add, color: Colors.white),
-          shape: CircleBorder(
-            side: BorderSide(color: Colors.white, width: 2.0),
-          ),
-        ),
       ),
     );
   }
