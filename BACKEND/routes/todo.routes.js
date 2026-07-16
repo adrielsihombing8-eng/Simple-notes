@@ -5,6 +5,8 @@ express.post('/store-note', todoController.auth, todoController.todoStore);
 express.get('/get-note', todoController.auth, todoController.getNote);
 express.get('/get-noteByKategori', todoController.auth, todoController.getNoteByData);
 express.get('/get-noteByName', todoController.auth, todoController.getNoteBYTitle);
-express.get('get-noteByNameAndKategory', todoController.auth, todoController.getNoteByKatAndTitle);
+express.get('/get-noteByNameAndKategory', todoController.auth, todoController.getNoteByKatAndTitle);
+express.delate('/delate-Note/:id', todoController.auth, todoController.delateData);
+express.put('/update-Note/:id', todoController.auth, todoController.updateData);
 
 module.exports = express;

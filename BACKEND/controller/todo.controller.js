@@ -106,16 +106,16 @@ exports.getNoteByData = async (req, res, next) => {
 };
 
 exports.getNoteBYTitle = async (req, res, next) => {
-    try{
+    try {
         console.log("memulai pencarian");
 
-        const {keyword} = req.query;
-        let filter = {userId: req.userId};
+        const { keyword } = req.query;
+        let filter = { userId: req.userId };
 
-        if(keyword){
+        if (keyword) {
             const keywords = keyword.trim().split(/\s+/).filter(Boolean);
-            filter.$and =  keywords.map(kw => ({
-                title: {$regex: kw, $options: "i"}
+            filter.$and = keywords.map(kw => ({
+                title: { $regex: kw, $options: "i" }
             }));
 
             console.log(filter);
@@ -130,30 +130,30 @@ exports.getNoteBYTitle = async (req, res, next) => {
             data: notes,
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         next();
     }
 };
 
 exports.getNoteByKatAndTitle = async (req, res, next) => {
-    const {title, kategori} = req.query;
-    const filter = {userId: req.userId};
+    const { title, kategori } = req.query;
+    const filter = { userId: req.userId };
     const andConditon = [];
 
-    if(title){
+    if (title) {
         title.trim().split(/\s+/).filter(Boolean).forEach(word => {
-            andConditon.push({$regex: word, $options: "i"})
+            andConditon.push({ $regex: word, $options: "i" })
         });
     }
 
-    if(kategori){
-        kategori.trim().split(/\s+/).filter(Boolean).forEach(word =>{
-            andConditon.push({$regex: word, $options: "i"})
+    if (kategori) {
+        kategori.trim().split(/\s+/).filter(Boolean).forEach(word => {
+            andConditon.push({ $regex: word, $options: "i" })
         })
     }
 
-    if(andConditon > 0){
+    if (andConditon > 0) {
         filter.$and = andConditon;
     }
 
@@ -162,11 +162,57 @@ exports.getNoteByKatAndTitle = async (req, res, next) => {
     console.log("data ditemukan");
 
     res.status(200).json({
-        success : true,
-        data : notes
+        success: true,
+        data: notes
     })
 };
 
+exports.delateData = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const userId = req.userId;
+
+        const note = await TodoService.findNote(id);
+        if (!note) {
+            return res.status(404).json({ message: "Data gagal di temukan" });
+        };
+
+        if (userId.toString() === note.userId.toString()) {
+            const delate = await TodoService.delate(id);
+        }
+        else {
+            return res.status(403).json({ message: "tidak punya akses" });
+        }
+
+        console.log("data di hapus");
+        return res.status(200).json({ message: "Data di hapus" });
+    }
+    catch (err) {
+        next(err);
+    }
+};
+
 exports.updateData = async (req, res, next) => {
-    
+    try {
+        const { id } = req.params;
+        const note = await TodoService.findNote(id);
+        const userId = req.userId;
+
+        if (note) {
+            if (userId.toString() === note.userId.toString()) {
+                const updateNote = await TodoService.updateNote(id, req.body);
+                return res.status(200).json({ message: "Data diupdate", data: updateNote });
+            }
+            else {
+                return res.status(403).json({ message: "tidak memiliki akses ke data ini" });
+            }
+        }
+        else {
+            return res.status(404).json({ message: "Data tidak ditemukan" });
+        }
+    }
+    catch (err) {
+        next(err);
+    }
 };
