@@ -424,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Notescreen(token: token!),
+                      builder: (context) => Notescreen(),
                     ),
                   );
 

@@ -5,31 +5,35 @@ import 'package:login_ui/presentation/Login_page.dart';
 import 'package:login_ui/services/api.dart';
 import 'package:login_ui/services/auth_store.dart';
 
-class Notescreen extends StatefulWidget {
-  const Notescreen({super.key});
+class Editnotescreen extends StatefulWidget {
+  final NoteModels data;
+  const Editnotescreen({required this.data, super.key});
 
   @override
-  State<Notescreen> createState() => _NotescreenState();
+  State<Editnotescreen> createState() => _EditnotescreenState();
 }
 
-class _NotescreenState extends State<Notescreen> {
+class _EditnotescreenState extends State<Editnotescreen> {
   var titleCtrl = new TextEditingController();
   var descCtrl = new TextEditingController();
   var dateController = new TextEditingController();
   var timeCtrl = new TextEditingController();
 
   bool isSaving = false;
-  String pilih = "None";
+  late String pilih;
 
   @override
   void initState() {
-    titleCtrl.text = "Note";
-    dateController.text = DateTime.now().toString().split(" ")[0];
-    timeCtrl.text =
-        DateTime.now().toString().split(" ")[1].split(":")[0] +
-        " : " +
-        DateTime.now().toString().split(" ")[1].split(":")[1];
     super.initState();
+    loadData();
+  }
+
+  void loadData(){
+    titleCtrl.text = widget.data.title;
+    dateController.text = widget.data.date;
+    timeCtrl.text = widget.data.time;
+    descCtrl.text = widget.data.desc;
+    pilih = widget.data.pref;
   }
 
   @override
@@ -43,6 +47,7 @@ class _NotescreenState extends State<Notescreen> {
 
   Future<void> storeNote() async {
     var token = await AuthStore.getToken();
+    var objectId = widget.data.objectId;
 
     if(token == null){
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
@@ -59,7 +64,7 @@ class _NotescreenState extends State<Notescreen> {
       "description": descCtrl.text.toString(),
     };
 
-    Api.createNote(data, token);
+    Api.updateNote(token, objectId, data);
   }
 
   final List<Map<String, dynamic>> dropdownItem = [

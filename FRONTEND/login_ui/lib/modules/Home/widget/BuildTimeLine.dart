@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:login_ui/models/note_models.dart';
+import 'package:login_ui/modules/Home/NoteScreen.dart';
+import 'package:login_ui/presentation/Login_page.dart';
+import 'package:login_ui/services/auth_store.dart';
 
 class Buildtimeline extends StatefulWidget {
   final NoteModels item;
@@ -15,6 +18,29 @@ class Buildtimeline extends StatefulWidget {
 
 class _BuildtimelineState extends State<Buildtimeline> {
   bool changeColors = false;
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    loadToken();
+  }
+
+  void loadToken() async{
+    var fatchedtoken = await AuthStore.getToken();
+
+    if(!mounted) return;
+
+    if(fatchedtoken == null){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      return;
+    }
+    else{
+      setState(() {
+      token = fatchedtoken;
+    });
+    }
+  }
 
   void ChangeColors(bool? colorsIs){
     setState(() {
@@ -41,6 +67,9 @@ class _BuildtimelineState extends State<Buildtimeline> {
   Widget build(BuildContext context) {
     return IntrinsicHeight(
     child: GestureDetector(
+      onTap: () {
+        Notescreen();
+      },
       behavior: HitTestBehavior.opaque,
       onLongPress: longPrees,
       child: Container(

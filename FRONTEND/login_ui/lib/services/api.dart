@@ -170,7 +170,7 @@ class Api {
           (value) => {
             note.add(
               NoteModels(
-                objectId: value ['_id'],
+                objectId: value['_id'],
                 title: value['title'],
                 pref: value['pref'],
                 desc: value['description'],
@@ -355,6 +355,46 @@ class Api {
     } catch (err) {
       print(err.toString());
       return note;
+    }
+  }
+
+  //edit
+  static Future<void> updateNote(
+    String token,
+    String objectId,
+    Map<String, String> data,
+  ) async {
+    var url = Uri.parse("${BaseUrl}/update-Note/$objectId");
+
+    try {
+      var res = await http.put(
+        url,
+        body: jsonEncode(data),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if(res.statusCode != 200){
+        throw Exception('Gagal update note');
+      }
+
+    } catch (err) {
+      print(err.toString());
+      return;
+    }
+  }
+
+  //delate
+  static Future<void> delateNote(String token, String objectId) async{
+    var url = Uri.parse("${BaseUrl}/delate-Note/$objectId");
+
+    try{
+      var res = await http.delete(url, headers: {'Authorization' : 'Bearer $token'});
+
+      if(res != 200){
+        throw Exception('Gagal hapus data');
+      }
+    }
+    catch(err){
+      print(err.toString());
     }
   }
 }
