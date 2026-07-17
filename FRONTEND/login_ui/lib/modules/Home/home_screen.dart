@@ -46,6 +46,45 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void DelateNote() async {
+    var t = await AuthStore.getToken();
+    if (t == null) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        token = t;
+        Api.delateNote(t, selectedIds).catchError((err) {
+          if (err..toString().contains("SESSION_EXCEPTION")) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          }
+        });
+        selectedIds.clear();
+        isDelating = false;
+        noteApi = Api.getNote(t).catchError((err) {
+          if (err.toString().contains("SESSION_EXPIRED")) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          }
+        });
+      });
+    } else {
+      return;
+    }
+  }
+
   void onCheckChanged(String id, bool isChecked) {
     setState(() {
       if (isChecked) {
@@ -412,12 +451,12 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: EdgeInsetsGeometry.only(bottom: isKeyboardOpen ? 0 : 150),
         child: isDelating
             ? FloatingActionButton(
-              onPressed: () {
-                //api menghapus
-              },
-              backgroundColor: Colors.redAccent,
-              child: Icon(Icons.delete_outline, color: Colors.white,),
-              shape: CircleBorder(
+                onPressed: () {
+                  DelateNote();
+                },
+                backgroundColor: Colors.redAccent,
+                child: Icon(Icons.delete_outline, color: Colors.white),
+                shape: CircleBorder(
                   side: BorderSide(color: Colors.white, width: 2.0),
                 ),
               )
@@ -425,9 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => Notescreen(),
-                    ),
+                    MaterialPageRoute(builder: (context) => Notescreen()),
                   );
 
                   if (result == true) {

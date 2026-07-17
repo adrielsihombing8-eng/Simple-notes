@@ -372,10 +372,25 @@ class Api {
         body: jsonEncode(data),
         headers: {'Authorization': 'Bearer $token'},
       );
-      if(res.statusCode != 200){
-        throw Exception('Gagal update note');
+
+      if (res.statusCode == 401) {
+        var newtoken = await AuthStore.getRefreshToken();
+        if (newtoken == null) {
+          throw new Exception("SESSION_EXPIRED");
+        }
+        await AuthStore.saveToken(newtoken);
+        var res = await http.put(
+          url,
+          body: jsonEncode(data),
+          headers: {'Authorization': 'Bearer $token'},
+        );
       }
 
+      if (res.statusCode != 200) {
+        throw new Exception('Gagal update note');
+      } else {
+        print("Data diupdate");
+      }
     } catch (err) {
       print(err.toString());
       return;
@@ -383,17 +398,39 @@ class Api {
   }
 
   //delate
-  static Future<void> delateNote(String token, String objectId) async{
-    var url = Uri.parse("${BaseUrl}/delate-Note/$objectId");
+  static Future<void> delateNote(
+    String token,
+    Set<String> data,
+  ) async {
+    var url = Uri.parse("${BaseUrl}/delate-Note");
 
-    try{
-      var res = await http.delete(url, headers: {'Authorization' : 'Bearer $token'});
+    try {
+      var res = await http.delete(
+        url,
+        body: data,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-      if(res != 200){
+      if (res.statusCode == 401) {
+        var newtoken = await AuthStore.getRefreshToken();
+        if (newtoken == null) {
+          throw new Exception("SESSION_EXPIRED");
+        }
+        await AuthStore.saveToken(newtoken);
+        var res = await http.delete(
+          url,
+          body: data,
+          headers: {'Authorization': 'Bearer $token'},
+        );
+      }
+
+      if (res != 200) {
         throw Exception('Gagal hapus data');
       }
-    }
-    catch(err){
+      else{
+        print("Data berhasil dihapus");
+      }
+    } catch (err) {
       print(err.toString());
     }
   }

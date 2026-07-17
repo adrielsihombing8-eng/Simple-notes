@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:login_ui/models/note_models.dart';
+import 'package:login_ui/modules/Home/EditNoteScreen.dart';
 import 'package:login_ui/modules/Home/NoteScreen.dart';
 import 'package:login_ui/presentation/Login_page.dart';
 import 'package:login_ui/services/auth_store.dart';
@@ -68,7 +69,7 @@ class _BuildtimelineState extends State<Buildtimeline> {
     return IntrinsicHeight(
     child: GestureDetector(
       onTap: () {
-        Notescreen();
+        Editnotescreen(data: widget.item,);
       },
       behavior: HitTestBehavior.opaque,
       onLongPress: longPrees,
