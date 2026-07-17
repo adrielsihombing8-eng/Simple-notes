@@ -412,7 +412,9 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: EdgeInsetsGeometry.only(bottom: isKeyboardOpen ? 0 : 150),
         child: isDelating
             ? FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                //api menghapus
+              },
               backgroundColor: Colors.redAccent,
               child: Icon(Icons.delete_outline, color: Colors.white,),
               shape: CircleBorder(
