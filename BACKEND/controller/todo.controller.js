@@ -169,20 +169,23 @@ exports.getNoteByKatAndTitle = async (req, res, next) => {
 
 exports.delateData = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
+        const { ids } = req.body;
         const userId = req.userId;
 
-        const note = await TodoService.findNote(id);
-        if (!note) {
-            return res.status(404).json({ message: "Data gagal di temukan" });
-        };
-
-        if (userId.toString() === note.userId.toString()) {
-            const delate = await TodoService.delate(id);
+        const note = await TodoService.findNote()
+        if (notes.length === 0) {
+            return res.status(404).json({ message: "Data tidak ditemukan" });
         }
-        else {
-            return res.status(403).json({ message: "tidak punya akses" });
+
+        const unauthorized = notes.some(note => note.userId.toString() !== userId.toString());
+        if (unauthorized) {
+            return res.status(403).json({ message: "Tidak punya akses ke beberapa data" });
+        }
+
+        const result = await TodoService.delateNote(ids);
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Data gagal di hapus" });
         }
 
         console.log("data di hapus");

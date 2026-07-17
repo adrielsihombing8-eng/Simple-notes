@@ -39,9 +39,9 @@ class TodoService {
         }
     }
 
-    static async delate(id) {
+    static async delateNote(id) {
         try {
-            const data = await todoModel.findByIdAndDelete(id);
+            const data = await todoModel.deleteMany({_id : {$in : id}});
             return data;
         } catch (err) {
             console.log("error pencarian");
@@ -52,6 +52,16 @@ class TodoService {
     static async findNote(id) {
         try {
             const note = await todoModel.findById(id);
+            return note;
+        } catch (err) {
+            console.log("error pencarian");
+            throw new Error("error pencarian");
+        }
+    }
+
+    static async findNotes(id) {
+        try {
+            const note = await todoModel.find({_id : {$in : id}});
             return note;
         } catch (err) {
             console.log("error pencarian");

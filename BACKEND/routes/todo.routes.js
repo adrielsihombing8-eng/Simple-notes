@@ -7,6 +7,6 @@ express.get('/get-noteByKategori', todoController.auth, todoController.getNoteBy
 express.get('/get-noteByName', todoController.auth, todoController.getNoteBYTitle);
 express.get('/get-noteByNameAndKategory', todoController.auth, todoController.getNoteByKatAndTitle);
 express.delate('/delate-Note/:id', todoController.auth, todoController.delateData);
-express.put('/update-Note/:id', todoController.auth, todoController.updateData);
+express.put('/update-Note', todoController.auth, todoController.updateData);
 
 module.exports = express;
